@@ -68,3 +68,15 @@ The first variable will always be the table of the class. Now that this is regis
 ```
 
 The `demo` folder in this repo showcases how this works across multiple modules.
+
+
+# Benefits
+
+Mainly separation of state and behavior.
+
+This allows a user reload the defmethods at the repl. 
+
+There is a slight "overhead" to this but it's roughly 0.3 seconds slower over 9 million invocations compared to a regular metatable call. (with my computer)
+
+I can easily serialize my entities/objects because they don't have inherent methods attached to them, and object creation is faster since I don't need to attach a metatable to them so it can somewhat offset the slowdown by using the defgeneric/defmethod.
+
