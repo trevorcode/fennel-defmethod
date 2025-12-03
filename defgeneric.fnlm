@@ -1,0 +1,18 @@
+(fn defgeneric [name]
+  (let [namestr (tostring name)
+        call-method
+        '(fn [methods# entity# ...]
+           (let [method# (. methods# (?. entity# :class))]
+            (if method#
+                (method# entity# ...)
+                (error (.. "No method for " ,(tostring name)
+                           " on "
+                           (or entity#.class "invalid class"))))))
+        f '(setmetatable {} {:__call ,call-method})]
+    `(local ,name ,f)))
+
+(fn defmethod [name class args ...]
+  `(set (. ,name ,class)
+        (fn ,args ,...)))
+
+{: defgeneric : defmethod}
