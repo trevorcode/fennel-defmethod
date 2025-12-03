@@ -35,10 +35,15 @@ The approach is not meant to be a clojure multimethod, because for gamedev we of
 
 After importing the macros:
 
-`(import-macros {: defgeneric : defmethod} :defgeneric)`
+```clojure
+(import-macros {: defgeneric : defmethod} :defgeneric)
+```
 
 Define a generic method
-`(defgeneric speak)`
+
+```clojure
+(defgeneric speak)
+```
 
 What this does is it returns a function that can be called named `speak`. This function has a dispatch table (hidden in a metatable) that will search for any classes that are registered to the `speak` method.
 
