@@ -6,5 +6,7 @@
 
 (local cat (cat-module.new "Garfield" "Orange"))
 
+(each [_ o (ipairs [cat dog])]
+  (speak o))
 (speak cat)
 (speak dog)

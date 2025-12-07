@@ -2,7 +2,7 @@
 (local speak (require :demo.speak))
 
 (defmethod speak :dog [self]
-  (print "bark!!!"))
+  (print "bark!!!!!"))
 
 (fn new [name color]
   {:class :dog

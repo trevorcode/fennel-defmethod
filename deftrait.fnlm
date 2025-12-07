@@ -1,0 +1,60 @@
+(fn deftrait [name & fn-list]
+  `(local ,name ,(icollect [_ t# (ipairs fn-list)]
+                   (tostring t#))))
+
+(fn deftype [name]
+  `(local ,name {:__index {:type ,(tostring name)
+                           :traits {}}
+                 :new (fn [self# instance#]
+                        (setmetatable instance# self#))}))
+
+(fn implold [type trait & fn-list]
+  (assert-compile (= 0 (% (length fn-list) 2)) "Must have a function for every function name" fn-list)
+  (let [trait-name (tostring trait)
+        fns-to-implement (faccumulate [acc {}
+                                       i 1 (length fn-list) 2]
+                           (doto acc
+                             (tset (tostring (. fn-list i)) (. fn-list (+ i 1)))))]
+    `(let [trait-list# ,trait
+           type# ,type]
+       (each [_# t# (ipairs trait-list#)]
+         (assert (. ,fns-to-implement t#) (.. "Did not implement function '"
+                                              t# "' from trait '" ,trait-name "'")))
+
+       (set (. type# :__index :traits ,trait-name) true)
+       (each [f-name# f-value# (pairs ,fns-to-implement)]
+         (set (. type# :__index f-name#) f-value#)))))
+
+(fn impl [type & args]
+  (if (sym? (. args 1))
+      (let [[trait & fn-list] args] 
+        (let [trait-name (tostring trait)
+              fns-to-implement (accumulate [acc {}
+                                            _ f (ipairs fn-list)]
+                                 (do 
+                                   (assert-compile (and (. f 1) (. f 2))
+                                                   "Must have a function for every function name" args)
+                                   (doto acc
+                                     (tset (tostring (. f 1)) (. f 2)))))]
+          `(let [trait-list# ,trait
+                 type# ,type]
+             (each [_# t# (ipairs trait-list#)]
+               (assert (. ,fns-to-implement t#) (.. "Did not implement function '"
+                                                    t# "' from trait '" ,trait-name "'")))
+             
+             (set (. type# :__index :traits ,trait-name) true)
+             (each [f-name# f-value# (pairs ,fns-to-implement)]
+               (set (. type# :__index f-name#) f-value#)))))
+      (let [fn-list args
+            fns-to-implement (accumulate [acc {}
+                                            _ f (ipairs fn-list)]
+                                 (do 
+                                   (assert-compile (and (. f 1) (. f 2))
+                                                   "Must have a function for every function name" args)
+                                   (doto acc
+                                     (tset (tostring (. f 1)) (. f 2)))))]
+          `(let [type# ,type]
+             (each [f-name# f-value# (pairs ,fns-to-implement)]
+               (set (. type# :__index f-name#) f-value#))))))
+
+{: deftrait : deftype : impl}
